@@ -16,7 +16,7 @@ code = struct('n',n,'k',k,'matriz',matriz,'vocabulario',palavras_cod_polar);
 
 N = 100e3;         
 
-info = randi([0 1], N, 4);
+info = randi([0 1], N, k);
 
 codificado = block_enc(code, info);
 
@@ -30,9 +30,9 @@ K = log2(M);
 modulado = qammod(codificado,M,'InputType','bit');
 
 %% Rayleigh Fading Channel 
-Ts = 1/10000;
-fd = 100;
-h = rayleighchan(Ts,fd);
+Ts = 1/100000;
+fd = 130;
+h = rayleighchan(Ts, fd);
 modulado_vetor = reshape(modulado.',1,[]);
 h.StoreHistory=1;
 y = filter(h,modulado_vetor);

@@ -41,7 +41,7 @@ for l = 1:length(EbNo)
  
     [~,BER_SDD(l)]= biterr(info,sdd_decodificado);
        
-    demodulado_hard = qamdemod(recebido,M,'OutputType','bit'); % - = 1; + = 0.
+    demodulado_hard = qamdemod(recebido,M,'OutputType','bit'); 
      
     hdd_decodificado = block_dec_sdd(code, -(2*demodulado_hard-1));    
      
