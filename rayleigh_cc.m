@@ -1,4 +1,4 @@
-%% 16 QAM Viterbi decoder && 2/3 Convolutional enconding
+%% 16 QAM Viterbi decoder && 2/3 Convolutional enconding && Rayleigh
 % Author: Marcus Vinicius Bunn
 % date: 28/04/2017
 clc;clear all;
@@ -26,16 +26,21 @@ tbl=16;
 delay = k*tbl;
 
 % Convolutional enconding
-
 codeword = convenc(info,trellis);
+
 
 % Modulacao
 M = 16;
 K = log2(M);
+modulated = qammod(codeword,M,'InputType','bit');
 
-% Montando vetor para modulaçao
-toMod = reshape(codeword,n,[]).';
-txSig = qammod(codeword,M,'InputType','bit');
+% Rayleigh Fading Channel 
+Ts = 1/100000;
+fd = 5;
+h = rayleighchan(Ts, fd);
+h.StoreHistory=1;
+txSig = filter(h,modulated);
+channel_gains = h.PathGains;
 
 EbNo= -2:10;
 berSoft = zeros(size(EbNo));
@@ -74,3 +79,8 @@ title('BER simulation of SDD 16 QAM 2/3 CC')
 ylabel('Pb')
 xlabel('Eb/No')
 legend('SDD','HDD');
+
+%     dataSoft = vitdec(rxDataSoft,trellis,tbl,'cont','unquant');
+%   Quantize to prepare for soft-decision decoding.
+%   qcode = quantiz(teste,[min(teste),min(teste)*peso/K,min(teste)*peso/(2*K),max(teste)/min(teste),max(teste)/(2*peso*K),max(teste)/(peso*K),max(teste)]);
+    
