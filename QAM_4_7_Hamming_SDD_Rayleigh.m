@@ -1,4 +1,4 @@
-%% 16 QAM - && Rayleigh
+%% 16 QAM - 4/7 Hamming && Rayleigh
 % Author: Marcus Vinicius Bunn
 % date: 03/05/2017
 

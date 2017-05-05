@@ -1,3 +1,7 @@
+%% 16 QAM Viterbi decoder && 4/7 Hamming && Rayleigh
+% Author: Marcus Vinicius Bunn
+% date: 28/04/2017
+
 clear all; close all; clc;
 
 n = 7;

@@ -1,8 +1,9 @@
-%% SDD - Viterbi decoder && Convolutional enconding
+%% 16 QAM Viterbi decoder && 2/3 Convolutional enconding && Interleaver
 % Author: Marcus Vinicius Bunn
-% date: 28/04/2017
+% date: 03/05/2017
+
 clc;clear all;
-N = 100e3;         
+N = 200e3;         
 k = 2;
 n = 3;
 codeRate = k/n;
@@ -28,38 +29,33 @@ delay = k*tbl;
 % Convolutional enconding
 codeword = convenc(info,trellis);
 
+% interleaved
+state = 4831;
+interleaved = randintrlv(codeword,state);
 
 % Modulacao
 M = 16;
 K = log2(M);
-modulated = qammod(codeword,M,'InputType','bit');
+txSig = qammod(codeword,M,'InputType','bit');
 
-% Rayleigh Fading Channel 
-Ts = 1/100000;
-fd = 5;
-h = rayleighchan(Ts, fd);
-h.StoreHistory=1;
-txSig = filter(h,modulated);
-channel_gains = h.PathGains;
+%interleaved
+txSigInterleaved = qammod(interleaved,M,'InputType','bit');
 
-EbNo= -2:10;
+EbNo= -2:20;
 berSoft = zeros(size(EbNo));
 berHard = zeros(size(EbNo));
+berSoftInterleaved = zeros(size(EbNo));
+berHardInterleaved = zeros(size(EbNo));
 ndsec=3;
 maximo_soft = 2^ndsec-1;
 peso = maximo_soft/ndsec;
 
-% interleaved
-state = 4831;
-interleaved = randintrlv(txSig,state);
 
 for n = 1:length(EbNo)    
     
     %% without interleaving
-    with_noise = awgn(txSig,EbNo(n),'measured');
-    
-    rxSig = with_noise./channel_gains;
-    
+    rxSig = awgn(txSig,EbNo(n),'measured');
+        
     rxDataSoft = qamdemod(rxSig,M,'OutputType','llr'); % -1 = 1 + = 0.
     rxDataHard = qamdemod(rxSig,M,'OutputType','bit');
     
@@ -79,10 +75,8 @@ for n = 1:length(EbNo)
     
     %% with interleaving
     
-    with_noise = awgn(interleaved,EbNo(n),'measured');
-    
-    rxSig = with_noise./channel_gains;
-    
+    rxSig = awgn(txSigInterleaved,EbNo(n),'measured');
+        
     rxDataSoft = qamdemod(rxSig,M,'OutputType','llr'); % -1 = 1 + = 0.
     rxDataHard = qamdemod(rxSig,M,'OutputType','bit');
     
@@ -94,15 +88,18 @@ for n = 1:length(EbNo)
     
     qcode = quantiz(teste,[0.001,.1,.3,.5,.7,.9,.999]);
 
-    dataSoft = vitdec(qcode,trellis,tbl,'cont','soft',ndsec);
-    dataHard = vitdec(rxDataHard,trellis,tbl,'cont','hard');
-
+    softDeinter = randdeintrlv(qcode,state); % Deinterleave.
+    hardDeinter = randdeintrlv(rxDataHard,state); % Deinterleave.
+    
+    dataSoft = vitdec(softDeinter,trellis,tbl,'cont','soft',ndsec);
+    dataHard = vitdec(hardDeinter,trellis,tbl,'cont','hard');
+    
     [~,berSoftInterleaved(n)]= biterr(info(1:end-delay),dataSoft(delay+1:end));
     [~,berHardInterleaved(n)]= biterr(info(1:end-delay),dataHard(delay+1:end));
 end
 
 figure(1)
-semilogy(EbNo,berSoft,EbNo,berHard);
+semilogy(EbNo,berSoft,EbNo,berHard,EbNo,berSoftInterleaved,EbNo,berHardInterleaved);
 title('BER simulation of SDD 16 QAM 2/3 CC on Rayleigh fadding channel and interleaved')
 ylabel('Pb')
 xlabel('Eb/No')

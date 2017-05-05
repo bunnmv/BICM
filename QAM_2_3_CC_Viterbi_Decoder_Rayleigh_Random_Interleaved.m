@@ -3,7 +3,7 @@
 % date: 03/05/2017
 
 clc;clear all;
-N = 100e3;         
+N = 200e3;         
 k = 2;
 n = 3;
 codeRate = k/n;
@@ -42,7 +42,7 @@ modulatedInterleaved = qammod(interleaved,M,'InputType','bit');
 
 % Rayleigh Fading Channel 
 Ts = 1/100000;
-fd = 5;
+fd = 130;
 h = rayleighchan(Ts, fd);
 h.ResetBeforeFiltering = 0;
 h.StoreHistory=1;
