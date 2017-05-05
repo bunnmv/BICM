@@ -63,7 +63,7 @@ for n = 1:length(EbNo)
          disp(n)
     end
     
-    dataSoft = vitdec(real(rxDataSoft),trellis,tbl,'cont','unquant');
+    dataSoft = vitdec(rxDataSoft,trellis,tbl,'cont','unquant');
     dataHard = vitdec(rxDataHard,trellis,tbl,'cont','hard');
 
     [~,berSoft(n)] = biterr(info(1:end-delay),dataSoft(delay+1:end));

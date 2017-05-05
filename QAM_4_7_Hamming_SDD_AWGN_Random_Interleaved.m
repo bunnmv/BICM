@@ -45,6 +45,7 @@ EbNo = -2:10;
 for l = 1:length(EbNo)
     
     %Without Interleaver
+    snr = 
     recebido = awgn(modulado, EbNo(l)); 
         
     demodulado_soft = qamdemod(recebido,M,'OutputType','llr'); % - = 1; + = 0.

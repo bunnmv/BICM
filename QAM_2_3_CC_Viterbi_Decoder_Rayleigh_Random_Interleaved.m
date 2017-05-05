@@ -93,7 +93,7 @@ for n = 1:length(EbNo)
     softDeinter = randdeintrlv(rxDataSoft,state); % Deinterleave.
     hardDeinter = randdeintrlv(rxDataHard,state); % Deinterleave.
     
-    dataSoft = vitdec(softDeinter,trellis,tbl,'cont','quant');
+    dataSoft = vitdec(softDeinter,trellis,tbl,'cont','quant','soft',3);
     dataHard = vitdec(hardDeinter,trellis,tbl,'cont','hard');
     
     [~,berSoftInterleaved(n)]= biterr(info(1:end-delay),dataSoft(delay+1:end));
