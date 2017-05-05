@@ -1,7 +1,8 @@
 %% 16 QAM Viterbi decoder && 2/3 Convolutional enconding && Rayleigh
 % Author: Marcus Vinicius Bunn
 % date: 28/04/2017
-clc;clear all;
+
+clc; clear all;
 N = 100e3;         
 k = 2;
 n = 3;
@@ -36,7 +37,7 @@ modulated = qammod(codeword,M,'InputType','bit');
 
 % Rayleigh Fading Channel 
 Ts = 1/100000;
-fd = 5;
+fd = 130;
 h = rayleighchan(Ts, fd);
 h.StoreHistory=1;
 txSig = filter(h,modulated);
@@ -45,32 +46,28 @@ channel_gains = h.PathGains;
 EbNo= -2:10;
 berSoft = zeros(size(EbNo));
 berHard = zeros(size(EbNo));
-ndsec=3;
-maximo_soft = 2^ndsec-1;
-peso = maximo_soft/ndsec;
 
 for n = 1:length(EbNo)    
     
-    with_noise = awgn(txSig,EbNo(n),'measured');
+    snr = EbNo(n) + 10*log10(K*codeRate);
+    
+    with_noise = awgn(txSig,snr,'measured');
     
     rxSig = with_noise./channel_gains;
     
     rxDataSoft = qamdemod(rxSig,M,'OutputType','llr'); % -1 = 1 + = 0.
     rxDataHard = qamdemod(rxSig,M,'OutputType','bit');
     
-    teste = rxDataSoft*-1; % - = 0 e 1 = 1;
+    if isreal(rxDataSoft)
+        disp('real')
+         disp(n)
+    end
     
-    % 0 = the most confident 0 and 2^nsdec-1 = the most confident 1 
-    % TO DO = func onde min(teste) = 0 e max(teste) = maximo_soft
-    % meio = peso/2 como quantizar ?
-    
-    qcode = quantiz(teste,[0.001,.1,.3,.5,.7,.9,.999]);
-
-    dataSoft = vitdec(qcode,trellis,tbl,'cont','soft',ndsec);
+    dataSoft = vitdec(real(rxDataSoft),trellis,tbl,'cont','unquant');
     dataHard = vitdec(rxDataHard,trellis,tbl,'cont','hard');
 
-    [~,berSoft(n)]= biterr(info(1:end-delay),dataSoft(delay+1:end));
-    [~,berHard(n)]= biterr(info(1:end-delay),dataHard(delay+1:end));
+    [~,berSoft(n)] = biterr(info(1:end-delay),dataSoft(delay+1:end));
+    [~,berHard(n)] = biterr(info(1:end-delay),dataHard(delay+1:end));
 end
 
 figure(1)
@@ -79,8 +76,3 @@ title('BER simulation of SDD 16 QAM 2/3 CC')
 ylabel('Pb')
 xlabel('Eb/No')
 legend('SDD','HDD');
-
-%     dataSoft = vitdec(rxDataSoft,trellis,tbl,'cont','unquant');
-%   Quantize to prepare for soft-decision decoding.
-%   qcode = quantiz(teste,[min(teste),min(teste)*peso/K,min(teste)*peso/(2*K),max(teste)/min(teste),max(teste)/(2*peso*K),max(teste)/(peso*K),max(teste)]);
-    
