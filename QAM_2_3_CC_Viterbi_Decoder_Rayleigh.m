@@ -43,7 +43,7 @@ h.StoreHistory=1;
 txSig = filter(h,modulated);
 channel_gains = h.PathGains;
 
-EbNo= -2:10;
+EbNo= (-2:10)';
 berSoft = zeros(size(EbNo));
 berHard = zeros(size(EbNo));
 
@@ -55,13 +55,8 @@ for n = 1:length(EbNo)
     
     rxSig = with_noise./channel_gains;
     
-    rxDataSoft = qamdemod(rxSig,M,'OutputType','llr'); % -1 = 1 + = 0.
+    rxDataSoft = qamdemod(rxSig,M,'OutputType','approxllr','NoiseVariance',10.^(snr/10)); % -1 = 1 + = 0.
     rxDataHard = qamdemod(rxSig,M,'OutputType','bit');
-    
-    if isreal(rxDataSoft)
-        disp('real')
-         disp(n)
-    end
     
     dataSoft = vitdec(rxDataSoft,trellis,tbl,'cont','unquant');
     dataHard = vitdec(rxDataHard,trellis,tbl,'cont','hard');
@@ -72,7 +67,7 @@ end
 
 figure(1)
 semilogy(EbNo,berSoft,EbNo,berHard);
-title('BER simulation of SDD 16 QAM 2/3 CC')
+title('16 QAM 2/3 CC Rayleigh')
 ylabel('Pb')
 xlabel('Eb/No')
 legend('SDD','HDD');

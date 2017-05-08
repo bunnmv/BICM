@@ -104,8 +104,7 @@ end
 
 figure(1)
 semilogy(EbNo,BER_SDD,EbNo,BER_HDD,EbNo,BER_SDD_Inter,EbNo,BER_HDD_Inter);
-title('BER simulation of SDD 16 QAM (7,4) Hamming code info')
+title('16 QAM (7,4) Hamming Rayleigh and Interleaved')
 ylabel('Pb')
 xlabel('Eb/No')
 legend('SDD','HDD','SDD-Inter','HDD-Inter');
-disp('Diferença para o cc pode ser o processo de quantização anterior?');

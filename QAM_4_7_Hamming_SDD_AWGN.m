@@ -54,7 +54,7 @@ end
 
 figure(1)
 semilogy(EbNo,BER_SDD,EbNo,BER_HDD);
-title('BER simulation of SDD 16 QAM (7,4) Hamming code info')
+title('16 QAM (7,4) Hamming AWGN')
 ylabel('Pb')
 xlabel('Eb/No')
 legend('SDD','HDD');

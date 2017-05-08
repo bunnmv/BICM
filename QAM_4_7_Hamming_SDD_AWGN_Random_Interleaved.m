@@ -82,7 +82,7 @@ end
 
 figure(1)
 semilogy(EbNo,BER_SDD,EbNo,BER_HDD,EbNo,BER_SDD_Interleaved,EbNo,BER_HDD_interleaved);
-title('BER simulation of SDD 16 QAM (7,4) Hamming code info')
+title('16 QAM (7,4) Hamming AWGN and Interleaved')
 ylabel('Pb')
 xlabel('Eb/No')
 legend('SDD','HDD','SDD-Interleaved','HDD-Interleaved');

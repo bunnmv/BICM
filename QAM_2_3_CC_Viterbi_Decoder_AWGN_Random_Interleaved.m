@@ -87,7 +87,7 @@ end
 
 figure(1)
 semilogy(EbNo,berSoft,EbNo,berHard,EbNo,berSoftInterleaved,EbNo,berHardInterleaved);
-title('BER simulation of SDD 16 QAM 2/3 CC on AWGN channel and interleaved')
+title('16 QAM 2/3 CC AWGN and Interleaved')
 ylabel('Pb')
 xlabel('Eb/No')
 legend('SDD','HDD','SDDint','HDDint');

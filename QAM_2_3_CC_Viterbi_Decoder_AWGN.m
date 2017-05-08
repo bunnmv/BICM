@@ -62,7 +62,7 @@ ber = berawgn(EbNo,'qam',M);
 
 figure(1)
 semilogy(EbNo,berSoft,EbNo,berHard,EbNo,ber);
-title('BER simulation of SDD 16 QAM 2/3 CC')
+title('16 QAM 2/3 CC AWGN')
 ylabel('Pb')
 xlabel('Eb/No')
 legend('SDD','HDD','Uncoded Ber');
