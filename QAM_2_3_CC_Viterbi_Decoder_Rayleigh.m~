@@ -1,8 +1,8 @@
-%% 16 QAM Viterbi decoder && 2/3 Convolutional enconding
+%% 16 QAM Viterbi decoder && 2/3 Convolutional enconding && Rayleigh
 % Author: Marcus Vinicius Bunn
 % date: 28/04/2017
-clc;
-clear all;
+
+clc; clear all;
 N = 100e3;         
 k = 2;
 n = 3;
@@ -27,18 +27,23 @@ tbl=16;
 delay = k*tbl;
 
 % Convolutional enconding
-
 codeword = convenc(info,trellis);
+
 
 % Modulacao
 M = 16;
 K = log2(M);
+modulated = qammod(codeword,M,'InputType','bit');
 
-% Montando vetor para modulaçao
-toMod = reshape(codeword,n,[]).';
-txSig = qammod(codeword,M,'InputType','bit');
+% Rayleigh Fading Channel 
+Ts = 1/100000;
+fd = 130;
+h = rayleighchan(Ts, fd);
+h.StoreHistory=1;
+txSig = filter(h,modulated);
+channel_gains = h.PathGains;
 
-EbNo= -2:10;
+EbNo= (-2:10)';
 berSoft = zeros(size(EbNo));
 berHard = zeros(size(EbNo));
 
@@ -46,23 +51,23 @@ for n = 1:length(EbNo)
     
     snr = EbNo(n) + 10*log10(K*codeRate);
     
-    rxSig = awgn(txSig,snr,'measured');
-        
-    rxDataSoft = qamdemod(rxSig,M,'OutputType','approxllr'); % -1 = 1 + = 0.
+    with_noise = awgn(txSig,snr,'measured');
+    
+    rxSig = with_noise./channel_gains;
+    
+    rxDataSoft = qamdemod(rxSig,M,'OutputType','approxllr','NoiseVariance',(10.^(snr/10))./(channel_gains)); % -1 = 1 + = 0.
     rxDataHard = qamdemod(rxSig,M,'OutputType','bit');
     
     dataSoft = vitdec(rxDataSoft,trellis,tbl,'cont','unquant');
     dataHard = vitdec(rxDataHard,trellis,tbl,'cont','hard');
 
-    [~,berSoft(n)]= biterr(info(1:end-delay),dataSoft(delay+1:end));
-    [~,berHard(n)]= biterr(info(1:end-delay),dataHard(delay+1:end));
+    [~,berSoft(n)] = biterr(info(1:end-delay),dataSoft(delay+1:end));
+    [~,berHard(n)] = biterr(info(1:end-delay),dataHard(delay+1:end));
 end
 
-ber = berawgn(EbNo,'qam',M);
-
-figure(1)
-semilogy(EbNo,berSoft,EbNo,berHard,EbNo,ber);
-title('16 QAM 2/3 CC AWGN')
+figure(2);
+semilogy(EbNo,berSoft,EbNo,berHard);
+title('16 QAM 2/3 CC Rayleigh')
 ylabel('Pb')
 xlabel('Eb/No')
-legend('SDD','HDD','Uncoded Ber');
+legend('SDD','HDD');

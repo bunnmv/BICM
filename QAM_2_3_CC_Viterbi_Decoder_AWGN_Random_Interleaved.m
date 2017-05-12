@@ -3,7 +3,7 @@
 % date: 03/05/2017
 
 clc;clear all;
-N = 200e3;         
+N = 100e3;         
 k = 2;
 n = 3;
 codeRate = k/n;
@@ -55,7 +55,7 @@ for n = 1:length(EbNo)
     
     rxSig = awgn(txSig,snr,'measured');
         
-    rxDataSoft = qamdemod(rxSig,M,'OutputType','llr'); % -1 = 1 + = 0.
+    rxDataSoft = qamdemod(rxSig,M,'OutputType','approxllr'); % -1 = 1 + = 0.
     rxDataHard = qamdemod(rxSig,M,'OutputType','bit');
         
     % 0 = the most confident 0 and 2^nsdec-1 = the most confident 1 
@@ -72,7 +72,7 @@ for n = 1:length(EbNo)
     
     rxSig = awgn(txSigInterleaved,snr,'measured');
         
-    rxDataSoft = qamdemod(rxSig,M,'OutputType','llr'); % -1 = 1 + = 0.
+    rxDataSoft = qamdemod(rxSig,M,'OutputType','approxllr'); % -1 = 1 + = 0.
     rxDataHard = qamdemod(rxSig,M,'OutputType','bit');
     
     softDeinter = randdeintrlv(rxDataSoft,state); % Deinterleave.

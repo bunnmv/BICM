@@ -55,7 +55,7 @@ for n = 1:length(EbNo)
     
     rxSig = with_noise./channel_gains;
     
-    rxDataSoft = qamdemod(rxSig,M,'OutputType','approxllr','NoiseVariance',10.^(snr/10)); % -1 = 1 + = 0.
+    rxDataSoft = qamdemod(rxSig,M,'OutputType','approxllr','NoiseVariance',(10.^(snr/10))./(channel_gains.^2)); % -1 = 1 + = 0.
     rxDataHard = qamdemod(rxSig,M,'OutputType','bit');
     
     dataSoft = vitdec(rxDataSoft,trellis,tbl,'cont','unquant');
@@ -65,7 +65,7 @@ for n = 1:length(EbNo)
     [~,berHard(n)] = biterr(info(1:end-delay),dataHard(delay+1:end));
 end
 
-figure(1)
+figure(2);
 semilogy(EbNo,berSoft,EbNo,berHard);
 title('16 QAM 2/3 CC Rayleigh')
 ylabel('Pb')

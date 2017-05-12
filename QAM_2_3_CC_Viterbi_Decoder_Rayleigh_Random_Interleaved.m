@@ -24,7 +24,7 @@ info = randi([0 1], N*k, 1);
 % tbl = 32;
 
 trellis = poly2trellis([5 4],[23 35 0; 0 5 13]);
-tbl=16;
+tbl=5*8;
 delay = k*tbl;
 
 % Convolutional enconding
@@ -35,15 +35,18 @@ state = 4831;
 interleaved = randintrlv(codeword,state);
 
 % Modulacao
-M = 16;
+M = 4;
 K = log2(M);
-modulated = qammod(codeword,M,'InputType','bit');
+refconst = qammod(0:M-1,M);
+nf = modnorm(refconst,'avpow',1);
+modulated = qammod(codeword,M,'InputType','bit')*nf;
+
 %interleaved
-modulatedInterleaved = qammod(interleaved,M,'InputType','bit');
+modulatedInterleaved = qammod(interleaved,M,'InputType','bit')*nf;
 
 % Rayleigh Fading Channel 
 Ts = 1/100000;
-fd = 130;
+fd = 5;
 h = rayleighchan(Ts, fd);
 h.ResetBeforeFiltering = 0;
 h.StoreHistory=1;
@@ -55,7 +58,7 @@ txSigInterleaved = filter(h,modulatedInterleaved);
 channel_gainsInterleaved = h.PathGains;
 
 
-EbNo= (-2:10)';
+EbNo= (-2:20)';
 berSoft = zeros(size(EbNo));
 berHard = zeros(size(EbNo));
 berSoftInterleaved = zeros(size(EbNo));
@@ -70,10 +73,9 @@ for n = 1:length(EbNo)
     
     with_noise = awgn(txSig,snr,'measured');
     
-    rxSig = with_noise./channel_gains;
-    
-    rxDataSoft = qamdemod(rxSig,M,'OutputType','approxllr','NoiseVariance',10.^(snr/10)); % -1 = 1 + = 0.
-    rxDataHard = qamdemod(rxSig,M,'OutputType','bit');
+    rxSig = with_noise./(channel_gains);
+    rxDataSoft = qamdemod(rxSig/nf,M,'OutputType','approxllr','NoiseVariance',10.^(snr/10)); % -1 = 1 + = 0.
+    rxDataHard = qamdemod(rxSig/nf,M,'OutputType','bit');
     
     dataSoft = vitdec(rxDataSoft,trellis,tbl,'cont','unquant');
     dataHard = vitdec(rxDataHard,trellis,tbl,'cont','hard');
@@ -85,15 +87,15 @@ for n = 1:length(EbNo)
         
     with_noise = awgn(txSigInterleaved,snr,'measured');
     
-    rxSig = with_noise./channel_gainsInterleaved;
+    rxSig = with_noise./(channel_gainsInterleaved);
     
-    rxDataSoft = qamdemod(rxSig,M,'OutputType','approxllr','NoiseVariance',10.^(snr/10)); % -1 = 1 + = 0.
-    rxDataHard = qamdemod(rxSig,M,'OutputType','bit');
+    rxDataSoft = qamdemod(rxSig/nf,M,'OutputType','approxllr','NoiseVariance',10.^(snr/10)); % -1 = 1 + = 0.
+    rxDataHard = qamdemod(rxSig/nf,M,'OutputType','bit');
 
     softDeinter = randdeintrlv(rxDataSoft,state); % Deinterleave.
     hardDeinter = randdeintrlv(rxDataHard,state); % Deinterleave.
     
-    dataSoft = vitdec(softDeinter,trellis,tbl,'trunc','unquant');
+    dataSoft = vitdec(softDeinter,trellis,tbl,'cont','unquant');
     dataHard = vitdec(hardDeinter,trellis,tbl,'cont','hard');
     
     [~,berSoftInterleaved(n)]= biterr(info(1:end-delay),dataSoft(delay+1:end));
